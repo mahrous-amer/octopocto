@@ -1,0 +1,245 @@
+version: "3.2"
+
+services:
+  # The registry for all local images
+  registry:
+    image: registry:2
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    environment:
+      # REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
+      # REGISTRY_HTTP_TLS_KEY: /certs/domain.key
+      # REGISTRY_AUTH: htpasswd
+      # REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      # REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+      REGISTRY_HTTP_SECRET: "${REGISTRY_SECRET}"
+      REGISTRY_PROXY_REMOTEURL: https://registry-1.docker.io
+      REGISTRY_PROXY_USERNAME: circle4regentmarkets
+      REGISTRY_PROXY_PASSWORD: "${DOCKERHUB_PASSWORD}"
+    volumes:
+      - ./registry/data:/var/lib/registry
+      - ./registry/certs:/certs:ro
+      - ./registry/auth:/auth
+
+  # Full Redis cluster api - add more nodes to scale horizontally, ensure that
+  # the REDIS_NODES env var is correctly populated to make sure they
+  # are all picked up correctly. Note that this should be able to adapt
+  # to docker networking changes - on restart the nodes are rediscovered.
+  api-redis-node-0:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_api
+    volumes:
+      - api-redis-cluster_data-0:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7001"
+      - "REDIS_CLUSTER_CREATOR=1"
+
+  api-redis-node-1:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_api
+    volumes:
+      - api-redis-cluster_data-1:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7001"
+
+  api-redis-node-2:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_api
+    volumes:
+      - api-redis-cluster_data-2:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7001"
+
+  api-redis-node-3:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_api
+    volumes:
+      - api-redis-cluster_data-3:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7001"
+
+  api-redis-node-4:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_api
+    volumes:
+      - api-redis-cluster_data-4:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7001"
+
+  api-redis-node-5:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_api
+    volumes:
+      - api-redis-cluster_data-5:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7001"
+
+  # ... end of api Redis cluster nodes list here
+
+  # Full Redis cluster data - add more nodes to scale horizontally, ensure that
+  # the REDIS_NODES env var is correctly populated to make sure they
+  # are all picked up correctly. Note that this should be able to adapt
+  # to docker networking changes - on restart the nodes are rediscovered.
+  data-redis-node-0:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_data
+    volumes:
+      - data-redis-cluster_data-0:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7000"
+      - "REDIS_CLUSTER_CREATOR=1"
+
+  data-redis-node-1:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_data
+    volumes:
+      - data-redis-cluster_data-1:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7000"
+
+  data-redis-node-2:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_data
+    volumes:
+      - data-redis-cluster_data-2:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7000"
+
+  data-redis-node-3:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_data
+    volumes:
+      - data-redis-cluster_data-3:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7000"
+
+  data-redis-node-4:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_data
+    volumes:
+      - data-redis-cluster_data-4:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7000"
+
+  data-redis-node-5:
+    extends:
+      file: redis.yml
+      service: redis-node
+    networks:
+      - redis_data
+    volumes:
+      - data-redis-cluster_data-5:/bitnami
+    environment:
+      - "REDIS_CLUSTER_REPLICAS=0"
+      - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
+      - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
+      - "REDIS_DNS_RETRIES=30"
+      - "REDIS_PORT=7000"
+
+  # ... end of data Redis cluster nodes list here
+
+
+
+  # Start list of services
+
+
+  # End list of services
+
+volumes:
+  api-redis-cluster_data-0:
+  api-redis-cluster_data-1:
+  api-redis-cluster_data-2:
+  api-redis-cluster_data-3:
+  api-redis-cluster_data-4:
+  api-redis-cluster_data-5:
+  data-redis-cluster_data-0:
+  data-redis-cluster_data-1:
+  data-redis-cluster_data-2:
+  data-redis-cluster_data-3:
+  data-redis-cluster_data-4:
+  data-redis-cluster_data-5:
+
+networks:
+  default:
+  backend:
+  database:
+  redis_api:
+  redis_data:
