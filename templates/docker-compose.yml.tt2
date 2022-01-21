@@ -1,8 +1,8 @@
 [%
 # How many shards we have for each service. Note that Redis expects to be
 # an even number for main/replica pairing.
-DEFAULT REDIS_COUNT = 6,
-        PG_COUNT = 1;
+DEFAULT REDIS_COUNT = env.REDIS_COUNT,
+        PG_COUNT = env.PG_REPLICA_COUNT;
 
 # This is where it gets interesting: each of our services
 # is defined as a name, a source, and some options. The same
@@ -41,39 +41,74 @@ services:
       - ./registry/certs:/certs:ro
       - ./registry/auth:/auth
 
-[% nums = [7000, 7001] -%]
-[% FOREACH redis_cat IN category_list -%]
-[% port = nums.pop -%]
-  # Full Redis cluster [% redis_cat.name %] - add more nodes to scale horizontally, ensure that
+[% FOREACH cat IN category_list -%]
+  # Full Redis cluster [% cat.name %] - add more nodes to scale horizontally, ensure that
   # the REDIS_NODES env var is correctly populated to make sure they
   # are all picked up correctly. Note that this should be able to adapt
   # to docker networking changes - on restart the nodes are rediscovered.
 [% redis_list = [ ];
+pg_list = [];
  FOREACH redis IN REDIS_INDICES;
- # redis_list.push([redis_cat.name, "redis-node-$redis"].join('_'));
+  r = [cat.name, "redis-node-$redis"];
+  redis_list.push(r.join('_'));
  END
 -%]
+[%
+ FOREACH pg IN PG_INDICES;
+ p = [cat.name, "pg-$pg"];
+ pg_list.push(p.join('-'));
+ END
+-%]
+
 [% FOREACH redis IN REDIS_INDICES -%]
-  [% redis_cat.name %]-redis-node-[% redis %]:
+  [% cat.name %]-redis-node-[% redis %]:
     extends:
       file: redis.yml
       service: redis-node
     networks:
-      - redis_[% redis_cat.name %]
+      - [% cat.name %]_redis
     volumes:
-      - [% redis_cat.name %]-redis-cluster_data-[% redis %]:/bitnami
+      - [% cat.name %]-redis-[% redis %]-data:/bitnami/redis
     environment:
+      - "REDIS_NODES=[% redis_list.join(' ') %]"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PORT=[% port %]"
 [%  IF redis == '0' -%]
       - "REDIS_CLUSTER_CREATOR=1"
 [%  END -%]
+[% IF cat.env.REDIS_PASSWORD -%]
+      - "REDIS_PASSWORD=[% cat.env.REDIS_PASSWORD %]"
+[%  END -%]
 
 [% END -%]
-  # ... end of [% redis_cat.name %] Redis cluster nodes list here
+  
+# ... end of [% cat.name %] Redis cluster nodes list here
+
+# Dedicated Database for each category [% cat.name %].
+
+[% FOREACH pg IN PG_INDICES -%]
+  [% cat.name %]-pg-[% pg %]:
+    image: docker.io/bitnami/postgresql-repmgr:14-debian-10
+#    ports:
+#      - 5432
+    volumes:
+      - [% cat.name %]-pg-[% pg %]-data:/bitnami/postgresql
+    networks:
+      - [% cat.name %]_database
+    environment:
+      - REPMGR_NODE_NAME=[% cat.name %]-pg-[% pg %]
+      - REPMGR_NODE_NETWORK_NAME=[% cat.name %]-pg-[% pg %]
+      - REPMGR_PRIMARY_HOST=[% cat.name %]-pg-0
+      - REPMGR_PARTNER_NODES=[% pg_list.join(',') %]
+      - REPMGR_PASSWORD=[% env.REPMGR_PASSWORD  %]
+      - POSTGRESQL_PASSWORD=[% cat.env.POSTGRESQL_PASSWORD  %]
+      - POSTGRESQL_DATABASE=[% cat.name %]
+      # Add specific user from env if needed.
+
+
+[% END -%]
 
 [% END %]
 
@@ -82,7 +117,13 @@ services:
 [% FOREACH service IN service_list -%]
   [% service.instance %]:
 [%  IF service.build -%]
-    build: [% service.build %]
+    build: 
+      context: [% service.build.context %]
+      dockerfile: [% service.build.dockerfile %]
+      args:
+[% FOREACH arg IN service.build.args -%]
+        [% arg.key %]: "[% arg.value %]"
+[% END -%]
 [%  ELSIF service.image -%]
     image: [% service.image %]
 [%  END -%]
@@ -100,10 +141,9 @@ services:
 [%   END -%]
 [%  END -%]
     networks:
-      - default
-      - backend
-      - redis
-      - database
+      - services
+      - [% service.category %]_redis
+      - [% service.category %]_database
 [%  IF service.networks -%]
 [%   FOREACH network IN service.networks -%]
       - "[% network %]"
@@ -111,28 +151,16 @@ services:
 [%  END -%]
     depends_on:
 [%  FOREACH redis IN REDIS_INDICES -%]
-      - redis-node-[% redis %]
+      - [% service.category %]-redis-node-[% redis %]
 [%  END -%]
+[% FOREACH pg IN PG_INDICES -%]
+      - [% service.category %]-pg-[% pg %]
+[% END -%]
     volumes:
 [% FOREACH volume IN service.volumes -%]
       - [% volume %]
 [% END -%]
 
-  # Dedicated Database for each service.
-
-#  pg-[% service.pg %]:
-#    image: docker.io/bitnami/postgresql-repmgr:13-debian-10
-#    ports:
-#      - 5432
-#    volumes:
-#      - pg-[% service.pg %]-data:/bitnami/postgresql
-#    networks:
-#      - database
-#    environment:
-#      - POSTGRESQL_POSTGRES_PASSWORD=adminpassword
-#      - POSTGRESQL_USERNAME=customuser
-#      - POSTGRESQL_PASSWORD=custompassword
-#      - POSTGRESQL_DATABASE=customdatabase
 [% END -%]
 
   # End list of services
@@ -140,17 +168,17 @@ services:
 volumes:
 [% FOREACH category IN category_list -%]
 [% FOREACH redis IN REDIS_INDICES -%]
-  [% category.name %]-redis-cluster_data-[% redis %]:
+  [% category.name %]-redis-[% redis %]-data:
 [% END -%]
+[% FOREACH pg IN PG_INDICES -%]
+  [% category.name %]-pg-[% pg %]-data:
 [% END -%]
-[% FOREACH service IN service_list -%]
-  pg-[% service.pg %]-data:
 [% END -%]
 
 networks:
   default:
-  backend:
-  database:
+  services:
 [% FOREACH category IN category_list -%]
-  redis_[% category.name %]:
+  [% category.name %]_redis:
+  [% category.name %]_database:
 [% END -%]
