@@ -1,0 +1,2 @@
+requires 'Future', '>= 0.47';
+requires 'Net::Async::Spotify';
