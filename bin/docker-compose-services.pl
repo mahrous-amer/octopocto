@@ -27,6 +27,7 @@ use Log::Any::Adapter qw(Stderr), log_level => 'info';
 my %TYPES = (
     perl    => [ 'pm', 'pl', 'perl', 'ff' ],
     rust    => [ 'rs', 'rust' ],
+    python  => [ 'py', 'python' ],
     nodejs  => [ 'js', 'nodejs' ],
 );
 
@@ -34,6 +35,7 @@ my %default_env = (
     REDIS_CLUSTER      => "1",
     LOG_LEVEL          => "info",
 );
+
 my $env;
 try {
     $env = Dotenv->parse('bin/.env');

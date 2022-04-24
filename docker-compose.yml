@@ -348,6 +348,40 @@ services:
       - ./services/api/testing:/app/
       - ./pg_service.conf:/root/.pg_service.conf:ro
 
+  data_py_cry:
+    build: 
+      context: ./
+      dockerfile: base/python/Dockerfile
+      args:
+        base_dir: "base/python"
+        service_dir: "services/data/py_cry"
+    init: true
+    tty: true
+    restart: unless-stopped
+    environment:
+      APP: "data"
+      DATABASE: "postgresql://data-pg-0"
+      LOG_LEVEL: "info"
+      REDIS: "redis://data-redis-node-0:6379"
+      REDIS_CLUSTER: "1"
+      SERVICE_DIR: "/app/"
+      SERVICE_NAME: "Service::fetcher_service"
+    networks:
+      - services
+      - data_redis
+      - data_database
+    depends_on:
+      - data-redis-node-0
+      - data-redis-node-1
+      - data-redis-node-2
+      - data-redis-node-3
+      - data-redis-node-4
+      - data-redis-node-5
+      - data-pg-0
+    volumes:
+      - ./services/data/py_cry:/app/
+      - ./pg_service.conf:/root/.pg_service.conf:ro
+
 
   # End list of services
 
