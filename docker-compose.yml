@@ -280,81 +280,13 @@ services:
 
   # Start list of services
 
-  api_testing_dd:
-    build: 
-      context: ./
-      dockerfile: base/perl/Dockerfile
-      args:
-        base_dir: "base/perl"
-        service_dir: "services/api/testing"
-    init: true
-    tty: true
-    restart: unless-stopped
-    environment:
-      APP: "api"
-      DATABASE: "postgresql://api-pg-0"
-      LOG_LEVEL: "info"
-      REDIS: "redis://api-redis-node-0:6379"
-      REDIS_CLUSTER: "1"
-      SERVICE_DIR: "/app/"
-      SERVICE_NAME: "Service::test"
-    networks:
-      - services
-      - api_redis
-      - api_database
-    depends_on:
-      - api-redis-node-0
-      - api-redis-node-1
-      - api-redis-node-2
-      - api-redis-node-3
-      - api-redis-node-4
-      - api-redis-node-5
-      - api-pg-0
-    volumes:
-      - ./services/api/testing:/app/
-      - ./pg_service.conf:/root/.pg_service.conf:ro
-
-  api_testing_ff:
-    build: 
-      context: ./
-      dockerfile: base/perl/Dockerfile
-      args:
-        base_dir: "base/perl"
-        service_dir: "services/api/testing"
-    init: true
-    tty: true
-    restart: unless-stopped
-    environment:
-      APP: "api"
-      DATABASE: "postgresql://api-pg-0"
-      LOG_LEVEL: "info"
-      REDIS: "redis://api-redis-node-0:6379"
-      REDIS_CLUSTER: "1"
-      SERVICE_DIR: "/app/"
-      SERVICE_NAME: "Service::test"
-    networks:
-      - services
-      - api_redis
-      - api_database
-    depends_on:
-      - api-redis-node-0
-      - api-redis-node-1
-      - api-redis-node-2
-      - api-redis-node-3
-      - api-redis-node-4
-      - api-redis-node-5
-      - api-pg-0
-    volumes:
-      - ./services/api/testing:/app/
-      - ./pg_service.conf:/root/.pg_service.conf:ro
-
-  data_py_cry:
+  data_cryptonizer:
     build: 
       context: ./
       dockerfile: base/python/Dockerfile
       args:
         base_dir: "base/python"
-        service_dir: "services/data/py_cry"
+        service_dir: "services/data/cryptonizer"
     init: true
     tty: true
     restart: unless-stopped
@@ -379,7 +311,7 @@ services:
       - data-redis-node-5
       - data-pg-0
     volumes:
-      - ./services/data/py_cry:/app/
+      - ./services/data/cryptonizer:/app/
       - ./pg_service.conf:/root/.pg_service.conf:ro
 
 

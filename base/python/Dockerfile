@@ -2,6 +2,7 @@ FROM python:latest
 
 ARG base_dir
 ARG service_dir
+ARG arg
 
 COPY $base_dir /opt/app
 WORKDIR /opt/app
@@ -24,6 +25,7 @@ RUN if [ -n "$service_dir" ] ; then \
       && pip install -r /app/requirments.txt; \
     fi
 
-#ENTRYPOINT ["python3 /app/lib/Service/cry.py"]
+ENV PYTHONPATH="/app/lib"
+
 ENTRYPOINT ["/usr/local/bin/python3"]
-CMD ["/app/lib/Service/cry.py"]
+CMD ["/opt/app/main.py", "luno", "kraken", "binance"]
