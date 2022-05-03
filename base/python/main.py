@@ -50,10 +50,10 @@ def main():
       verbose = True
     elif o in ("-a", "--args"):
       args.insert(0, a)
-      if verbose: 
+      if verbose:
           print(f'Passing args: {args}')
-  print(verbose, filename, args, argv)
-  #run(verbose, filename, args)
+
+  run(verbose, filename, args)
 
 if __name__ == '__main__':
   main()

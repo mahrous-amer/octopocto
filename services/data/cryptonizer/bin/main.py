@@ -5,20 +5,21 @@ import configparser
 import asyncio
 from Service.provider import Provider
 
-FILENAME="config.cfg"
+Filename="config.cfg"
 Keys={}
 
-def getExchangeKeys(exchanges):
-    print(exchanges)
+def getExchangeKeys(filename, exchanges):
     config = configparser.ConfigParser()
-    config.read(FILENAME)
+    global Filename
+    Filename = filename
+    config.read(Filename)
     for exchange in exchanges:
         key = luno_key = config.get(exchange.upper(), 'key')
         secret = luno_secret = config.get(exchange.upper(), 'secret')
         Keys[exchange] = {'key': key, 'secret': secret}
         print(Keys[exchange])
 
-def run(args):
-    getExchangeKeys(args)
+def run(verbose, filename, args):
+    getExchangeKeys(filename, args)
     provider = Provider()
-    asyncio.new_event_loop().run_until_complete(provider.forever(Keys))
+    asyncio.new_event_loop().run_until_complete(provider.forever(verbose, Keys))

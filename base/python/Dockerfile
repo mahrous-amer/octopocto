@@ -28,4 +28,4 @@ RUN if [ -n "$service_dir" ] ; then \
 ENV PYTHONPATH="/app/lib"
 
 ENTRYPOINT ["/usr/local/bin/python3"]
-CMD ["/opt/app/main.py", "luno", "kraken", "binance"]
+CMD ["/opt/app/main.py", "-v", "-f", "config.cfg", "-a", "luno", "kraken", "binance"]

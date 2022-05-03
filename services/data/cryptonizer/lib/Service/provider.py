@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import logging.config
 import time
 import configparser
 import os
@@ -10,10 +11,6 @@ import ccxt.async_support as ccxt
 import pandas as pd
 from collections import defaultdict
 from decimal import Decimal
-
-logger = logging.getLogger(__name__)
-logging.basicConfig()
-logger = logging.getLogger('Provider')
 
 class Provider:
 
@@ -69,6 +66,6 @@ class Provider:
             raise e
 
 
-    async def forever(self, keys):
+    async def forever(self, verbose, keys):
         while True:
             results = await self.run_all_exchanges(keys)
