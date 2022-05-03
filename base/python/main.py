@@ -8,38 +8,52 @@ import getopt
 sys.path.insert(0, '/app/bin/')
 from main import run
 
-verbose = False
+argv = sys.argv[1:]
 args = []
+filename = None
+verbose = bool(None)
 
-try:
-  opts, args = getopt.getopt(sys.argv[1:], "hvf:a:", ["help", "verbose", "file", "args"])
-except getopt.GetoptError as err:
-  print( str(err) )
-  usage()
-  sys.exit(2)
+def usage():
+  print(  "Usage: " + __file__ + """ [-h] [-v] [-f]
+
+          -h,--help   print help
+
+          -v,--verbose    verbose
+
+          -f,--file   set config.cfg filepath
+
+          -a,--args   any args to your service
+          """)
+
+
 
 def main():
+
+  try:
+    opts, args = getopt.getopt(argv, "hvf:a:", ["help", "verbose", "file", "args"])
+  except getopt.GetoptError as err:
+    print( str(err) )
+    usage()
+    sys.exit(2)
+
   for o, a in opts:
     if o in ("-h", "--help"):
-      print(  "Usage: " + __file__ + """ [-h] [-v] [-f]
-
-              -h,--help   print help
-
-              -v,--verbose    verbose
-
-              -f,--file   set config.cfg filepath
-
-              -a,--args   any args to your service
-              """)
+      usage()
       sys.exit()
     elif o in ("-f", "--file"):
-      FILENAME = a
+      print(f'Setting config {a}')
+      global filename
+      filename = a
     elif o in ("-v", "--verbose"):
+      print("Setting verbose mode ON")
+      global verbose
       verbose = True
     elif o in ("-a", "--args"):
-      args.append(a)
-
-  run(args)
+      args.insert(0, a)
+      if verbose: 
+          print(f'Passing args: {args}')
+  print(verbose, filename, args, argv)
+  #run(verbose, filename, args)
 
 if __name__ == '__main__':
   main()
