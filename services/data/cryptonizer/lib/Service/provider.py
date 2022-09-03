@@ -1,50 +1,51 @@
-import asyncio
-import json
-import logging
-import logging.config
-import time
-import configparser
 import os
 import sys
-import redis
+import json
+import asyncio
+import logging
 import ccxt.async_support as ccxt
-import pandas as pd
 from collections import defaultdict
 from decimal import Decimal
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 class Provider:
+    def __init__(self, transport):
+        self.rc = transport
 
-    async def run_all_exchanges(self, keys):
+    async def run_all_exchanges(self, exchange_id):
         results = defaultdict(dict)
+        details = defaultdict(dict)
+        exchange = getattr(ccxt, exchange_id)({
+            'enableRateLimit': True,
+            'options': {
+                'useWebapiForFetchingFees': False,
+            }
+        })
 
-        for exchange_id in keys.keys():
-
-            exchange = getattr(ccxt, exchange_id)({
-                'enableRateLimit': True,
-                'options': {
-                    'useWebapiForFetchingFees': False,
-                }
-            })
-
-            print('Exchange:', exchange_id)
-            markets = await self.load_markets(exchange)
-            for symbol_id in markets.keys():
-                ticker = await self.fetch_ticker(exchange, symbol_id)
-                results[exchange_id+symbol_id]['Ticker'] = ticker
-                #orderbook = await fetch_orderbook(exchange, symbol_id)
-                #results[exchange_id+symbol_id]['OrderBook'] = orderbook
-                pretty = json.dumps(results[exchange_id+symbol_id]['Ticker'], indent=4, sort_keys=True)
-                print(pretty)
-            await exchange.close()
+        logger.info(f'Exchange: {exchange_id}')
+        markets = await self.load_markets(exchange)
+        for symbol_id in markets.keys():
+            data = await self.get_data(exchange, symbol_id)
+        await exchange.close()
         return results
 
+    async def get_data(self, exchange, symbol_id):
+        ticker = await self.fetch_ticker(exchange, symbol_id)
+        await asyncio.sleep(0.1)
+        orderbook = await self.fetch_orderbook(exchange, symbol_id)
+        await asyncio.sleep(0.1)
+        msg_id = await self.rc.xadd(str(exchange)+'::'+symbol_id, {'ticker': json.dumps(ticker), 'orderbook': json.dumps(orderbook)})
+        await asyncio.sleep(0.1)
+        return {'ticker': ticker, 'orderbook': orderbook}
 
     async def load_markets(self, exchange):
         try:
             result = await exchange.load_markets()
             return result
         except ccxt.BaseError as e:
-            print(type(e).__name__, str(e), str(e.args))
+            logger.error(type(e).__name__, str(e), str(e.args))
             raise e
 
 
@@ -53,7 +54,7 @@ class Provider:
             result = await exchange.fetch_ticker(symbol)
             return result
         except ccxt.BaseError as e:
-            print(type(e).__name__, str(e), str(e.args))
+            logger.warning(type(e).__name__, str(e), str(e.args))
             raise e
 
 
@@ -62,10 +63,19 @@ class Provider:
             result = await exchange.fetch_order_book(symbol)
             return result
         except ccxt.BaseError as e:
-            print(type(e).__name__, str(e), str(e.args))
+            logger.warning(type(e).__name__, str(e), str(e.args))
             raise e
 
 
-    async def forever(self, verbose, keys):
+    async def forever(self, keys):
         while True:
-            results = await self.run_all_exchanges(keys)
+            try:
+                now = datetime.now()
+                tasks = [self.run_all_exchanges(exchange) for exchange in keys.keys()]
+                results = asyncio.gather(*tasks)
+                later = datetime.now()
+                if (later - now).total_seconds() < 60:
+                    await asyncio.sleep(60 - (later - now).total_seconds())
+            except Exception as e:
+                logger.warning(e)
+                raise e

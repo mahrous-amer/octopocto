@@ -25,7 +25,9 @@ RUN if [ -n "$service_dir" ] ; then \
       && pip install -r /app/requirments.txt; \
     fi
 
+RUN pip install git+https://github.com/redis/redis-py.git
+
 ENV PYTHONPATH="/app/lib"
 
 ENTRYPOINT ["/usr/local/bin/python3"]
-CMD ["/opt/app/main.py", "-v", "-f", "config.cfg", "-a", "luno", "kraken", "binance"]
+CMD ["bin/main.py"]
