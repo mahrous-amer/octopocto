@@ -50,7 +50,7 @@ services:
 pg_list = [];
  FOREACH redis IN REDIS_INDICES;
   r = [cat.name, "redis-node-$redis"];
-  redis_list.push(r.join('_'));
+  redis_list.push(r.join('-'));
  END
 -%]
 [%

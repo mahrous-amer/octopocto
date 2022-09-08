@@ -36,7 +36,7 @@ services:
     volumes:
       - api-redis-0-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=api_redis-node-0 api_redis-node-1 api_redis-node-2 api_redis-node-3 api_redis-node-4 api_redis-node-5"
+      - "REDIS_NODES=api-redis-node-0 api-redis-node-1 api-redis-node-2 api-redis-node-3 api-redis-node-4 api-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -53,7 +53,7 @@ services:
     volumes:
       - api-redis-1-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=api_redis-node-0 api_redis-node-1 api_redis-node-2 api_redis-node-3 api_redis-node-4 api_redis-node-5"
+      - "REDIS_NODES=api-redis-node-0 api-redis-node-1 api-redis-node-2 api-redis-node-3 api-redis-node-4 api-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -69,7 +69,7 @@ services:
     volumes:
       - api-redis-2-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=api_redis-node-0 api_redis-node-1 api_redis-node-2 api_redis-node-3 api_redis-node-4 api_redis-node-5"
+      - "REDIS_NODES=api-redis-node-0 api-redis-node-1 api-redis-node-2 api-redis-node-3 api-redis-node-4 api-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -85,7 +85,7 @@ services:
     volumes:
       - api-redis-3-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=api_redis-node-0 api_redis-node-1 api_redis-node-2 api_redis-node-3 api_redis-node-4 api_redis-node-5"
+      - "REDIS_NODES=api-redis-node-0 api-redis-node-1 api-redis-node-2 api-redis-node-3 api-redis-node-4 api-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -101,7 +101,7 @@ services:
     volumes:
       - api-redis-4-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=api_redis-node-0 api_redis-node-1 api_redis-node-2 api_redis-node-3 api_redis-node-4 api_redis-node-5"
+      - "REDIS_NODES=api-redis-node-0 api-redis-node-1 api-redis-node-2 api-redis-node-3 api-redis-node-4 api-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -117,7 +117,7 @@ services:
     volumes:
       - api-redis-5-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=api_redis-node-0 api_redis-node-1 api_redis-node-2 api_redis-node-3 api_redis-node-4 api_redis-node-5"
+      - "REDIS_NODES=api-redis-node-0 api-redis-node-1 api-redis-node-2 api-redis-node-3 api-redis-node-4 api-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -163,7 +163,7 @@ services:
     volumes:
       - data-redis-0-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=data_redis-node-0 data_redis-node-1 data_redis-node-2 data_redis-node-3 data_redis-node-4 data_redis-node-5"
+      - "REDIS_NODES=data-redis-node-0 data-redis-node-1 data-redis-node-2 data-redis-node-3 data-redis-node-4 data-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -180,7 +180,7 @@ services:
     volumes:
       - data-redis-1-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=data_redis-node-0 data_redis-node-1 data_redis-node-2 data_redis-node-3 data_redis-node-4 data_redis-node-5"
+      - "REDIS_NODES=data-redis-node-0 data-redis-node-1 data-redis-node-2 data-redis-node-3 data-redis-node-4 data-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -196,7 +196,7 @@ services:
     volumes:
       - data-redis-2-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=data_redis-node-0 data_redis-node-1 data_redis-node-2 data_redis-node-3 data_redis-node-4 data_redis-node-5"
+      - "REDIS_NODES=data-redis-node-0 data-redis-node-1 data-redis-node-2 data-redis-node-3 data-redis-node-4 data-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -212,7 +212,7 @@ services:
     volumes:
       - data-redis-3-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=data_redis-node-0 data_redis-node-1 data_redis-node-2 data_redis-node-3 data_redis-node-4 data_redis-node-5"
+      - "REDIS_NODES=data-redis-node-0 data-redis-node-1 data-redis-node-2 data-redis-node-3 data-redis-node-4 data-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -228,7 +228,7 @@ services:
     volumes:
       - data-redis-4-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=data_redis-node-0 data_redis-node-1 data_redis-node-2 data_redis-node-3 data_redis-node-4 data_redis-node-5"
+      - "REDIS_NODES=data-redis-node-0 data-redis-node-1 data-redis-node-2 data-redis-node-3 data-redis-node-4 data-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -244,7 +244,7 @@ services:
     volumes:
       - data-redis-5-data:/bitnami/redis
     environment:
-      - "REDIS_NODES=data_redis-node-0 data_redis-node-1 data_redis-node-2 data_redis-node-3 data_redis-node-4 data_redis-node-5"
+      - "REDIS_NODES=data-redis-node-0 data-redis-node-1 data-redis-node-2 data-redis-node-3 data-redis-node-4 data-redis-node-5"
       - "REDIS_CLUSTER_REPLICAS=0"
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
@@ -280,13 +280,80 @@ services:
 
   # Start list of services
 
+  api_testing_dd:
+    build: 
+      context: ./
+      dockerfile: base/perl/Dockerfile
+      args:
+        base_dir: "base/perl"
+        service_dir: "services/api/testing"
+    init: true
+    tty: true
+    restart: unless-stopped
+    environment:
+      APP: "api"
+      DATABASE: "postgresql://api-pg-0"
+      LOG_LEVEL: "info"
+      REDIS: "redis://api-redis-node-0:6379"
+      REDIS_CLUSTER: "1"
+      SERVICE_DIR: "/app/"
+      SERVICE_NAME: "Service::test"
+    networks:
+      - services
+      - api_redis
+      - api_database
+    depends_on:
+      - api-redis-node-0
+      - api-redis-node-1
+      - api-redis-node-2
+      - api-redis-node-3
+      - api-redis-node-4
+      - api-redis-node-5
+      - api-pg-0
+    volumes:
+      - ./services/api/testing:/app/
+      - ./pg_service.conf:/root/.pg_service.conf:ro
+
+  api_testing_ff:
+    build: 
+      context: ./
+      dockerfile: base/perl/Dockerfile
+      args:
+        base_dir: "base/perl"
+        service_dir: "services/api/testing"
+    init: true
+    tty: true
+    restart: unless-stopped
+    environment:
+      APP: "api"
+      DATABASE: "postgresql://api-pg-0"
+      LOG_LEVEL: "info"
+      REDIS: "redis://api-redis-node-0:6379"
+      REDIS_CLUSTER: "1"
+      SERVICE_DIR: "/app/"
+      SERVICE_NAME: "Service::test"
+    networks:
+      - services
+      - api_redis
+      - api_database
+    depends_on:
+      - api-redis-node-0
+      - api-redis-node-1
+      - api-redis-node-2
+      - api-redis-node-3
+      - api-redis-node-4
+      - api-redis-node-5
+      - api-pg-0
+    volumes:
+      - ./services/api/testing:/app/
+      - ./pg_service.conf:/root/.pg_service.conf:ro
+
   data_cryptonizer:
     build: 
       context: ./
       dockerfile: base/python/Dockerfile
       args:
         base_dir: "base/python"
-        service_dir: "services/data/cryptonizer"
     init: true
     tty: true
     restart: unless-stopped
@@ -297,7 +364,7 @@ services:
       REDIS: "redis://data-redis-node-0:6379"
       REDIS_CLUSTER: "1"
       SERVICE_DIR: "/app/"
-      SERVICE_NAME: "Service::fetcher_service"
+      SERVICE_NAME: "Service::provider"
     networks:
       - services
       - data_redis

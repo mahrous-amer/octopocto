@@ -29,17 +29,14 @@ class Redis:
     return key[ind:-1]
 
   def compare_id(x='0-0', y='0-0'):
-    if x == y : 
-      return 0 
+    if x == y :
+      return 0
     else :
       first = x.split('-',2)
       second = y.split('-',2)
       cmp = sign(first[0]-second[0])
       cmp2 = sign(first[1]-second[1])
-    return  cmp or cmp2
-    # return first[0] <=> second[0] or first[1] <=> second[1]
-
-     
+    return cmp or cmp2
 
   def next_id(id):
     (left, right) = id.split('-', 2)
@@ -47,10 +44,7 @@ class Redis:
 
   async def connect(self):
     try:
-      r = await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
-      logger.info(r)
-      self.cluster = r.intialize()
-      
+       self.cluster = await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
     except Exception as e:
       logger.warn(e)
 

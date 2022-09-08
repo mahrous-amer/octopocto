@@ -71,7 +71,7 @@ for my $category (@cat_dirs) {
         my @service_dir = $srv->child('lib/Service/')->children;
         my ($service_name, $type) = $service_dir[0] =~ /.*\/(.*)\.(.*)/m;
         my $lang;
-        ($lang) = grep { grep { /$type|$config->{language}/ } $TYPES{$_}->@* } keys %TYPES;
+        ($lang) = grep { grep { /$config->{language}|$type/ } $TYPES{$_}->@* } keys %TYPES;
 
         # Image
         if($srv->child('Dockerfile')->exists) {
