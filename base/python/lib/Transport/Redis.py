@@ -2,6 +2,7 @@ import sys
 import logging
 import asyncio
 import async_timeout
+from numpy import sign
 from redis.exceptions import ConnectionError, DataError, NoScriptError, RedisError, ResponseError
 from redis.asyncio.cluster import RedisCluster as redis
 
@@ -24,23 +25,32 @@ class Redis:
       return self.prefix + key
 
   def remove_prefix(self, key):
-    ind = key.find(self.prefix):
+    ind = key.find(self.prefix);
     return key[ind:-1]
 
   def compare_id(x='0-0', y='0-0'):
-    return 0 if x = y
-    first = x.split('-',2)
-    second = y.split('-',2)
-    return first[0] <=> second[0] or first[1] <=> second[1]
+    if x == y : 
+      return 0 
+    else :
+      first = x.split('-',2)
+      second = y.split('-',2)
+      cmp = sign(first[0]-second[0])
+      cmp2 = sign(first[1]-second[1])
+    return  cmp or cmp2
+    # return first[0] <=> second[0] or first[1] <=> second[1]
+
+     
 
   def next_id(id):
     (left, right) = id.split('-', 2)
-    return left + '-' + str(int(right)++)
+    return left + '-' + str(int(right)+1)
 
   async def connect(self):
     try:
-      redis = await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
-      self.cluster = redis.intialize()
+      r = await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
+      logger.info(r)
+      self.cluster = r.intialize()
+      
     except Exception as e:
       logger.warn(e)
 
@@ -62,10 +72,11 @@ class Redis:
     except Exception as e:
       logger.warn(e)
 
-  async def cleanup():
-  async def watch_keyspace():
+  # async def cleanup():
 
-  async def create_stream():
+  # async def watch_keyspace():
+
+  # async def create_stream():
 
   async def xadd(self, key, val):
     try:
@@ -73,7 +84,6 @@ class Redis:
       logger.info(f'{key}: {str(res)}')
       return res
     except Exception as e:
-      logger.warn(f'{key}: {str(val)}')
       logger.warn(e)
 
   async def xreadgroup(self, key, gname, cname):
@@ -90,18 +100,18 @@ class Redis:
     except ResponseError as e:
         print(f"raised: {e}")
 
-  async def remove_group():
+  # async def remove_group():
 
   async def group_info(key):
     res = self.cluster.xinfo_groups( name=key )
     for i in res:
       logger.info( f"{key} -> group name: {i['name']} with {i['consumers']} consumers and {i['last-delivered-id']}" + f" as last read id")
 
-  async def pending():
-  async def pending_messages_info():
-  async def stream_length():
-  async def stream_info(self, steam):
-  async def oldest_processed_id(self, stream):
+  # async def pending():
+  # async def pending_messages_info():
+  # async def stream_length():
+  # async def stream_info(self, steam):
+  # async def oldest_processed_id(self, stream):
 
   async def ack(self, msg_id):
     try:
