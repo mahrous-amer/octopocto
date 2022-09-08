@@ -47,7 +47,7 @@ async def run(loop):
     getExchangeKeys(['luno', 'binance', 'kraken'])
     try:
         transport = Redis('cryptonizer')
-        await transport.start()
+        await transport.connect()
         provider = Provider(transport)
         await provider.forever(Keys)
         await transport.close()
