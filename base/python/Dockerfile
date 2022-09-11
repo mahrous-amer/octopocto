@@ -22,7 +22,7 @@ RUN if [ -n "$service_dir" ] ; then \
       && apt-get -y -q update \
       && DEBIAN_FRONTEND=noninteractive \
       && apt-get -y -q --no-install-recommends install $(cat aptfile) \
-      && pip install -r /app/requirments.txt; \
+      && pip install -r requirments.txt; \
     fi
 
 RUN pip install git+https://github.com/redis/redis-py.git
