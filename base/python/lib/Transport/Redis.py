@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 import asyncio
@@ -44,7 +45,7 @@ class Redis:
 
   async def connect(self):
     try:
-       self.cluster = await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
+       self.cluster = await redis.from_url(os.environ['REDIS'])#= await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
     except Exception as e:
       logger.warn(e)
 
@@ -70,34 +71,41 @@ class Redis:
 
   # async def watch_keyspace():
 
-  # async def create_stream():
+  async def create_stream(stream):
+    await self.create_group(stream, 'INIT', '$', 1);
+    await self.remove_group(stream, 'INIT');
+    logger.info('Created a Redis stream: %s', stream);
 
-  async def xadd(self, key, val):
+  async def xadd(self, stream, fields, nomkstream=False):
     try:
-      res = await self.cluster.xadd(key, val)
-      logger.info(f'{key}: {str(res)}')
+      res = await self.cluster.xadd(self.apply_prefix(stream), fields, id="*", nomkstream=nomkstream)
+      logger.info(f'{stream}: {str(res)}')
       return res
     except Exception as e:
       logger.warn(e)
 
   async def xreadgroup(self, key, gname, cname):
     try:
-      res = r.xreadgroup(groupname=gname, consumername=cname, block=10, count=2, streams={key:'>'})
+      res = await self.cluster.xreadgroup(groupname=gname, consumername=cname, block=10, count=2, streams={key:'>'})
       logger.info(res)
       return res
     except Exception as e:
       logger.warn(e)
 
-  async def create_group(key, gname):
+  async def create_group(stream, gname, start='$', mkstream=0):
     try:
-      self.cluster.xgroup_create( name=key, groupname=gname, id=0 )
+      await self.cluster.xgroup_create( name=self.apply_prefix(stream), groupname=gname)
     except ResponseError as e:
-        print(f"raised: {e}")
+      logger.warn(f"Raised: {e}")
 
-  # async def remove_group():
+  async def remove_group(stream, gname):
+    try:
+      await self.cluster.xgroup_destroy(self.apply_prefix(stream), gname)
+    except ResponseError as e:
+      logger.warn(f"Raised: {e}")
 
   async def group_info(key):
-    res = self.cluster.xinfo_groups( name=key )
+    res = self.cluster.xinfo_groups( name=self.apply_prefix(stream) )
     for i in res:
       logger.info( f"{key} -> group name: {i['name']} with {i['consumers']} consumers and {i['last-delivered-id']}" + f" as last read id")
 
@@ -112,6 +120,7 @@ class Redis:
       return await self.cluster.xack(msg_id)
     except Exception as e:
       logger.warn(e)
+
   async def set(self, key, val):
     try:
       return await self.cluster.set(key, str(val))

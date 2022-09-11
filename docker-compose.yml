@@ -169,7 +169,6 @@ services:
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
       - "REDIS_CLUSTER_CREATOR=1"
-      - "REDIS_PASSWORD=22"
 
   data-redis-node-1:
     extends:
@@ -185,7 +184,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   data-redis-node-2:
     extends:
@@ -201,7 +199,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   data-redis-node-3:
     extends:
@@ -217,7 +214,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   data-redis-node-4:
     extends:
@@ -233,7 +229,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   data-redis-node-5:
     extends:
@@ -249,7 +244,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   
 # ... end of data Redis cluster nodes list here
@@ -270,7 +264,7 @@ services:
       - REPMGR_PRIMARY_HOST=data-pg-0
       - REPMGR_PARTNER_NODES=data-pg-0
       - REPMGR_PASSWORD=repmgrpass
-      - POSTGRESQL_PASSWORD=secretpass
+      - POSTGRESQL_PASSWORD=
       - POSTGRESQL_DATABASE=data
       # Add specific user from env if needed.
 
@@ -354,6 +348,7 @@ services:
       dockerfile: base/python/Dockerfile
       args:
         base_dir: "base/python"
+        service_dir: "services/data/cryptonizer"
     init: true
     tty: true
     restart: unless-stopped
