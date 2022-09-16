@@ -33,11 +33,9 @@ class Provider:
 
     async def get_data(self, exchange, symbol_id):
         ticker = await self.fetch_ticker(exchange, symbol_id)
-        await asyncio.sleep(0.1)
         orderbook = await self.fetch_orderbook(exchange, symbol_id)
-        await asyncio.sleep(0.1)
-        msg_id = await self.rc.xadd(str(exchange)+'::'+symbol_id, {'ticker': json.dumps(ticker), 'orderbook': json.dumps(orderbook)})
-        await asyncio.sleep(0.1)
+        if self.rc is not None:
+            msg_id = await self.rc.xadd(str(exchange)+'::'+symbol_id, {'ticker': json.dumps(ticker), 'orderbook': json.dumps(orderbook)})
         return {'ticker': ticker, 'orderbook': orderbook}
 
     async def load_markets(self, exchange):

@@ -45,7 +45,7 @@ class Redis:
 
   async def connect(self):
     try:
-       self.cluster = await redis.from_url(os.environ['REDIS'])#= await redis.from_url('redis://data-redis-node-0:6379/0?decode_responses=True&health_check_interval=5')
+       self.cluster = await redis.from_url(os.environ['REDIS'])
     except Exception as e:
       logger.warn(e)
 
@@ -68,8 +68,10 @@ class Redis:
       logger.warn(e)
 
   # async def cleanup():
+  # TODO
 
   # async def watch_keyspace():
+  # TODO
 
   async def create_stream(stream):
     await self.create_group(stream, 'INIT', '$', 1);
@@ -79,7 +81,7 @@ class Redis:
   async def xadd(self, stream, fields, nomkstream=False):
     try:
       res = await self.cluster.xadd(self.apply_prefix(stream), fields, id="*", nomkstream=nomkstream)
-      logger.info(f'{stream}: {str(res)}')
+      stream = self.apply_prefix(stream)
       return res
     except Exception as e:
       logger.warn(e)
@@ -87,7 +89,6 @@ class Redis:
   async def xreadgroup(self, key, gname, cname):
     try:
       res = await self.cluster.xreadgroup(groupname=gname, consumername=cname, block=10, count=2, streams={key:'>'})
-      logger.info(res)
       return res
     except Exception as e:
       logger.warn(e)
@@ -110,10 +111,19 @@ class Redis:
       logger.info( f"{key} -> group name: {i['name']} with {i['consumers']} consumers and {i['last-delivered-id']}" + f" as last read id")
 
   # async def pending():
+  # TODO
+
   # async def pending_messages_info():
+  # TODO
+
   # async def stream_length():
+  # TODO
+
   # async def stream_info(self, steam):
+  # TODO
+
   # async def oldest_processed_id(self, stream):
+  # TODO
 
   async def ack(self, msg_id):
     try:
