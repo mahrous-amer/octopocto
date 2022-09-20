@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import logging
 import asyncio
 import async_timeout
@@ -12,15 +13,17 @@ logger = logging.getLogger(__name__)
 class Redis:
 
   def __init__(self, name):
-    self.name = name
-    self.group = 'g'+name
-    self.prefix = 'octocrypto::py::'
+    self.name = name.upper()
+    self.group = 'G_'+name.upper()
+    self.consumer = 'C_'+name.upper()
+    self.c = 0
+    self.prefix = 'OCTOCRYPTO::PYTHON::'
     self.cluster = None
     self.wait_time = None
     self.batch_count = None
 
   def apply_prefix(self, key):
-    if key.find(self.prefix):
+    if key.find(self.prefix) != -1:
       return key
     else:
       return self.prefix + key
@@ -45,27 +48,27 @@ class Redis:
 
   async def connect(self):
     try:
-       self.cluster = await redis.from_url(os.environ['REDIS'])
+       self.cluster = redis.from_url(os.environ['REDIS'], decode_responses=True)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   async def get_nodes(self):
     try:
         return self.cluster.get_nodes()
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   async def close(self):
     try:
         await self.cluster.close()
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   async def exec(self, command, args):
     try:
       return await self.cluster.execute_command(command)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   # async def cleanup():
   # TODO
@@ -81,34 +84,45 @@ class Redis:
   async def xadd(self, stream, fields, nomkstream=False):
     try:
       res = await self.cluster.xadd(self.apply_prefix(stream), fields, id="*", nomkstream=nomkstream)
-      stream = self.apply_prefix(stream)
+      logger.info(self.apply_prefix(stream) + ' ' + str( res ))
       return res
     except Exception as e:
-      logger.warn(e)
+      raise e
 
-  async def xreadgroup(self, key, gname, cname):
+  async def xreadgroup(self, stream):
     try:
-      res = await self.cluster.xreadgroup(groupname=gname, consumername=cname, block=10, count=2, streams={key:'>'})
+      await self.create_group(self.apply_prefix(stream))
+      res = await self.cluster.xreadgroup(self.group, self.consumer, {self.apply_prefix(stream):'>'}, count=1)
+      await asyncio.sleep(0.1)
+      logger.info(res)
       return res
     except Exception as e:
-      logger.warn(e)
+      raise e
 
-  async def create_group(stream, gname, start='$', mkstream=0):
+  async def create_group(self, stream):
     try:
-      await self.cluster.xgroup_create( name=self.apply_prefix(stream), groupname=gname)
+      logger.info(f'XGROUP CREATE {self.group} {self.consumer}')
+      res = await self.cluster.xgroup_create(self.apply_prefix(stream), self.group, '$', True)
+      await asyncio.sleep(0.1)
+      logger.info(res)
+      logger.info(f'XGROUP CREATE CONSUMER {self.group} {self.consumer}')
+      res = await self.cluster.xgroup_createconsumer(self.apply_prefix(stream), self.group, self.consumer)
+      await asyncio.sleep(0.1)
+      logger.info(res)
     except ResponseError as e:
-      logger.warn(f"Raised: {e}")
+      raise e
 
-  async def remove_group(stream, gname):
+  async def remove_group(self, stream):
     try:
-      await self.cluster.xgroup_destroy(self.apply_prefix(stream), gname)
+      await self.cluster.xgroup_destroy(self.apply_prefix(stream), self.group)
     except ResponseError as e:
-      logger.warn(f"Raised: {e}")
+      raise e
 
-  async def group_info(key):
-    res = self.cluster.xinfo_groups( name=self.apply_prefix(stream) )
+  async def group_info(self, stream):
+    res = await self.cluster.xinfo_groups( name=self.apply_prefix(stream) )
+    await asyncio.sleep(0.1)
     for i in res:
-      logger.info( f"{key} -> group name: {i['name']} with {i['consumers']} consumers and {i['last-delivered-id']}" + f" as last read id")
+      logger.info( f"{stream} -> group name: {i['name']} with {i['consumers']} consumers and {i['last-delivered-id']}" + f" as last read id")
 
   # async def pending():
   # TODO
@@ -125,9 +139,11 @@ class Redis:
   # async def oldest_processed_id(self, stream):
   # TODO
 
-  async def ack(self, msg_id):
+  async def ack(self, stream, msg_ids):
     try:
-      return await self.cluster.xack(msg_id)
+      res = await self.cluster.xack(self.apply_prefix(stream), self.group, msg_ids)
+      logger.info(res)
+      return res
     except Exception as e:
       logger.warn(e)
 

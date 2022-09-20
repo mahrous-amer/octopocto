@@ -35,7 +35,7 @@ class Provider:
         ticker = await self.fetch_ticker(exchange, symbol_id)
         orderbook = await self.fetch_orderbook(exchange, symbol_id)
         if self.rc is not None:
-            msg_id = await self.rc.xadd(str(exchange)+'::'+symbol_id, {'ticker': json.dumps(ticker), 'orderbook': json.dumps(orderbook)})
+            msg_id = await self.rc.xadd(str(exchange).upper()+'::'+symbol_id, {'ticker': json.dumps(ticker), 'orderbook': json.dumps(orderbook)})
         return {'ticker': ticker, 'orderbook': orderbook}
 
     async def load_markets(self, exchange):
@@ -73,7 +73,9 @@ class Provider:
                 results = asyncio.gather(*tasks)
                 later = datetime.now()
                 if (later - now).total_seconds() < 60:
-                    await asyncio.sleep(60 - (later - now).total_seconds())
+                    ter = 60 - (later - now).total_seconds()
+                    logger.info(f'Will sleep for {ter} seconds zZ')
+                    await asyncio.sleep(ter)
             except Exception as e:
                 logger.warning(e)
                 raise e

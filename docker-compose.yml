@@ -42,7 +42,6 @@ services:
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
       - "REDIS_CLUSTER_CREATOR=1"
-      - "REDIS_PASSWORD=22"
 
   api-redis-node-1:
     extends:
@@ -58,7 +57,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   api-redis-node-2:
     extends:
@@ -74,7 +72,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   api-redis-node-3:
     extends:
@@ -90,7 +87,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   api-redis-node-4:
     extends:
@@ -106,7 +102,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   api-redis-node-5:
     extends:
@@ -122,7 +117,6 @@ services:
       - "REDIS_CLUSTER_SLEEP_BEFORE_DNS_LOOKUP=10"
       - "REDIS_CLUSTER_DNS_LOOKUP_RETRIES=30"
       - "REDIS_DNS_RETRIES=30"
-      - "REDIS_PASSWORD=22"
 
   
 # ... end of api Redis cluster nodes list here
@@ -143,7 +137,7 @@ services:
       - REPMGR_PRIMARY_HOST=api-pg-0
       - REPMGR_PARTNER_NODES=api-pg-0
       - REPMGR_PASSWORD=repmgrpass
-      - POSTGRESQL_PASSWORD=secretpass
+      - POSTGRESQL_PASSWORD=
       - POSTGRESQL_DATABASE=api
       # Add specific user from env if needed.
 
@@ -274,72 +268,39 @@ services:
 
   # Start list of services
 
-  api_testing_dd:
+  data_actionizer:
     build: 
       context: ./
-      dockerfile: base/perl/Dockerfile
+      dockerfile: base/python/Dockerfile
       args:
-        base_dir: "base/perl"
-        service_dir: "services/api/testing"
+        base_dir: "base/python"
+        service_dir: "services/data/actionizer"
     init: true
     tty: true
     restart: unless-stopped
     environment:
-      APP: "api"
-      DATABASE: "postgresql://api-pg-0"
+      APP: "data"
+      DATABASE: "postgresql://data-pg-0"
       LOG_LEVEL: "info"
-      REDIS: "redis://api-redis-node-0:6379"
+      REDIS: "redis://data-redis-node-0:6379"
       REDIS_CLUSTER: "1"
       SERVICE_DIR: "/app/"
-      SERVICE_NAME: "Service::test"
+      SERVICE_NAME: "Service::"
     networks:
       - services
-      - api_redis
-      - api_database
+      - data_redis
+      - data_database
     depends_on:
-      - api-redis-node-0
-      - api-redis-node-1
-      - api-redis-node-2
-      - api-redis-node-3
-      - api-redis-node-4
-      - api-redis-node-5
-      - api-pg-0
+      - data-redis-node-0
+      - data-redis-node-1
+      - data-redis-node-2
+      - data-redis-node-3
+      - data-redis-node-4
+      - data-redis-node-5
+      - data-pg-0
     volumes:
-      - ./services/api/testing:/app/
-      - ./pg_service.conf:/root/.pg_service.conf:ro
-
-  api_testing_ff:
-    build: 
-      context: ./
-      dockerfile: base/perl/Dockerfile
-      args:
-        base_dir: "base/perl"
-        service_dir: "services/api/testing"
-    init: true
-    tty: true
-    restart: unless-stopped
-    environment:
-      APP: "api"
-      DATABASE: "postgresql://api-pg-0"
-      LOG_LEVEL: "info"
-      REDIS: "redis://api-redis-node-0:6379"
-      REDIS_CLUSTER: "1"
-      SERVICE_DIR: "/app/"
-      SERVICE_NAME: "Service::test"
-    networks:
-      - services
-      - api_redis
-      - api_database
-    depends_on:
-      - api-redis-node-0
-      - api-redis-node-1
-      - api-redis-node-2
-      - api-redis-node-3
-      - api-redis-node-4
-      - api-redis-node-5
-      - api-pg-0
-    volumes:
-      - ./services/api/testing:/app/
+      - ./services/data/actionizer:/app/
+      - ./base/python:/opt/app/
       - ./pg_service.conf:/root/.pg_service.conf:ro
 
   data_cryptonizer:
@@ -374,6 +335,7 @@ services:
       - data-pg-0
     volumes:
       - ./services/data/cryptonizer:/app/
+      - ./base/python:/opt/app/
       - ./pg_service.conf:/root/.pg_service.conf:ro
 
 

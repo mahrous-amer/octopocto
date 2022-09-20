@@ -3,7 +3,6 @@ import sys
 import time
 import signal
 import yaml
-import asyncio
 import logging
 import logging.config
 import configparser
@@ -11,9 +10,8 @@ import argparse
 
 import importlib
 sys.path.insert(0, '/opt/app/lib/')
-from Transport.Async.Redis import Redis
-# from Message.Redis import msg
-from Service.provider import Provider
+from Transport.Sync.Redis import Redis
+from Service.actuator import Actuator
 
 logger = logging.getLogger(__name__)
 Filename="config.cfg"
@@ -43,14 +41,14 @@ def getExchangeKeys(exchanges, filename=Filename):
         secret = config.get(exchange.upper(), 'secret')
         Keys[exchange] = {'key': key, 'secret': secret}
 
-async def run():
+def run():
     getExchangeKeys(['luno', 'binance', 'kraken'])
     try:
-        transport = Redis('cryptonizer')
-        await transport.connect()
-        provider = Provider(transport)
-        await provider.forever(Keys)
-        await transport.close()
+        transport = Redis('actionizer')
+        transport.connect()
+        actuator = Actuator(transport)
+        actuator.forever(Keys)
+        transport.close()
     except Exception as e:
         logger.warning(e)
 
@@ -58,5 +56,4 @@ async def run():
 if __name__ == '__main__':
     init_argparse()
     logger.info('Starting...')
-    loop = asyncio.new_event_loop()
-    loop.run_until_complete(run())
+    run()
