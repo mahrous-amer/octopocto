@@ -71,7 +71,7 @@ for my $category (@cat_dirs) {
         my @service_dir = $srv->child('lib/Service/')->children;
         my ($service_name, $type) = $service_dir[0] =~ /.*\/(.*)\.(.*)/m;
         my $lang;
-        ($lang) = grep { grep { /$config->{language}|$type/ } $TYPES{$_}->@* } keys %TYPES;
+        ($lang) = defined $type ? grep { grep { /$config->{language}|$type/ } $TYPES{$_}->@* } keys %TYPES : grep { grep { /$config->{language}/ } $TYPES{$_}->@* } keys %TYPES;
 
         # Image
         if($srv->child('Dockerfile')->exists) {
@@ -85,7 +85,7 @@ for my $category (@cat_dirs) {
         }
         
         # At the moment only one Service should be present.
-        $args{environment}{SERVICE_NAME} = "Service::$service_name";
+        $args{environment}{SERVICE_NAME} = defined $service_name ? "Service::$service_name" : "Service::";
         $args{environment}{APP}          = $cat_name;
         $args{environment}{DATABASE}     = "postgresql://$cat_name-pg-0";
         $args{environment}{REDIS}        = "redis://$cat_name-redis-node-0:6379";
