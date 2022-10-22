@@ -24,9 +24,9 @@ class Provider:
             }
         })
 
-        logger.info(f'Exchange: {exchange_id}')
         markets = await self.load_markets(exchange)
         for symbol_id in markets.keys():
+            logger.info(f'Exchange: {exchange_id}::{symbol_id}')
             data = await self.get_data(exchange, symbol_id)
         await exchange.close()
         return results
@@ -67,15 +67,13 @@ class Provider:
 
     async def forever(self, keys):
         while True:
-            try:
-                now = datetime.now()
-                tasks = [self.run_all_exchanges(exchange) for exchange in keys.keys()]
-                results = asyncio.gather(*tasks)
-                later = datetime.now()
-                if (later - now).total_seconds() < 60:
-                    ter = 60 - (later - now).total_seconds()
-                    logger.info(f'Will sleep for {ter} seconds zZ')
-                    await asyncio.sleep(ter)
-            except Exception as e:
-                logger.warning(e)
-                raise e
+            now = datetime.now()
+            logger.info(f"Started at second: {now.second}...")
+            if now.second == 0 or now.second == 00:
+                for exchange in keys.keys():
+                    tasks = [self.run_all_exchanges(exchange) for exchange in keys.keys()]
+                    results = asyncio.gather(*tasks)
+            else:
+                ter = 60 - now.second
+                logger.info(f'Will sleep for {ter} seconds zZ')
+                await asyncio.sleep(ter)

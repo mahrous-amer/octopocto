@@ -12,7 +12,6 @@ import argparse
 import importlib
 sys.path.insert(0, '/opt/app/lib/')
 from Transport.Async.Redis import Redis
-# from Message.Redis import msg
 from Service.provider import Provider
 
 logger = logging.getLogger(__name__)
@@ -53,6 +52,7 @@ async def run():
         await transport.close()
     except Exception as e:
         logger.warning(e)
+        raise e
 
 
 if __name__ == '__main__':

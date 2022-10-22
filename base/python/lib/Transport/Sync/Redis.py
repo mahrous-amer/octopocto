@@ -14,7 +14,6 @@ class Redis:
     self.name = name.upper()
     self.group = 'G_'+name.upper()
     self.consumer = 'C_'+name.upper()
-    self.c = 0
     self.prefix = 'OCTOCRYPTO::PYTHON::'
     self.cluster = None
     self.wait_time = None
@@ -75,8 +74,8 @@ class Redis:
   # TODO
 
   def create_stream(stream):
-    self.create_group(stream, 'INIT', '$', 1);
-    self.remove_group(stream, 'INIT');
+    self.create_group(self.apply_prefix(stream));
+    self.remove_group(self.apply_prefix(stream));
     logger.info('Created a Redis stream: %s', stream);
 
   def xadd(self, stream, fields, nomkstream=False):
@@ -89,21 +88,21 @@ class Redis:
 
   def xreadgroup(self, stream):
     try:
-      #self.create_group(self.apply_prefix(stream))
       res = self.cluster.xreadgroup(self.group, self.consumer, {self.apply_prefix(stream):'>'}, count=1)
-      logger.info(res)
       return res
     except Exception as e:
+      if str(e).find('NOGROUP') != -1:
+        try:
+          self.create_group(self.apply_prefix(stream))
+          return self.cluster.xreadgroup(self.group, self.consumer, {self.apply_prefix(stream):'>'}, count=1)
+        except Exception as ex:
+          raise ex
       raise e
 
   def create_group(self, stream):
     try:
-      logger.info(f'XGROUP CREATE {self.group} {self.consumer}')
-      res = self.cluster.xgroup_create(self.apply_prefix(stream), self.group, '$', True)
-      logger.info(res)
-      logger.info(f'XGROUP CREATE CONSUMER {self.group} {self.consumer}')
-      res = self.cluster.xgroup_createconsumer(self.apply_prefix(stream), self.group, self.consumer)
-      logger.info(res)
+      self.cluster.xgroup_create(self.apply_prefix(stream), self.group, '$', True)
+      self.cluster.xgroup_createconsumer(self.apply_prefix(stream), self.group, self.consumer)
     except ResponseError as e:
       raise e
 
@@ -135,89 +134,87 @@ class Redis:
 
   def ack(self, stream, msg_ids):
     try:
-      res = self.cluster.xack(self.apply_prefix(stream), self.group, msg_ids)
-      logger.info(res)
-      return res
+      self.cluster.xack(self.apply_prefix(stream), self.group, msg_ids)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def set(self, key, val):
     try:
       return self.cluster.set(key, str(val))
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def get(self, key):
     try:
       return self.cluster.get(key)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def publish():
     try:
       return self.cluster.publish(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def subscribe():
     try:
       return self.cluster.subscribe(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def incr():
     try:
       return self.cluster.incr(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def rpush():
     try:
       return self.cluster.rpush(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def lpush():
     try:
       return self.cluster.lpush(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def rpop():
     try:
       return self.cluster.rpop(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def lpop():
     try:
       return self.cluster.lpop(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def hset():
     try:
       return self.cluster.hset(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def hget():
     try:
       return self.cluster.hget(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def hincrby():
     try:
       return self.cluster.hincrby(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def zadd():
     try:
       return self.cluster.zadd(msg_id)
     except Exception as e:
-      logger.warn(e)
+      raise e
 
   def zrem():
     try:

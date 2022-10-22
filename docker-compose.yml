@@ -300,7 +300,6 @@ services:
       - data-pg-0
     volumes:
       - ./services/data/actionizer:/app/
-      - ./base/python:/opt/app/
       - ./pg_service.conf:/root/.pg_service.conf:ro
 
   data_cryptonizer:
@@ -320,7 +319,7 @@ services:
       REDIS: "redis://data-redis-node-0:6379"
       REDIS_CLUSTER: "1"
       SERVICE_DIR: "/app/"
-      SERVICE_NAME: "Service::provider"
+      SERVICE_NAME: "Service::"
     networks:
       - services
       - data_redis
@@ -335,7 +334,6 @@ services:
       - data-pg-0
     volumes:
       - ./services/data/cryptonizer:/app/
-      - ./base/python:/opt/app/
       - ./pg_service.conf:/root/.pg_service.conf:ro
 
 

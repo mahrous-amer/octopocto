@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import logging
 import ccxt
 from collections import defaultdict
@@ -14,19 +15,19 @@ class Actuator:
         self.rc = transport
 
     def get_data(self, exchange_id):
-        logger.info(f'Exchange: {exchange_id}')
         markets = self.load_markets(exchange_id)
         for symbol_id in markets.keys():
-            logger.info(symbol_id)
+            stream = str(exchange_id).upper()+'::'+symbol_id
+            logger.info(f'Exchange: {stream}')
             try:
-                #data = self.rc.group_info(str(exchange_id).upper()+'::'+symbol_id)
-                data = self.rc.xreadgroup(str(exchange_id).upper()+'::'+symbol_id)
-                #data = self.rc.remove_group(str(exchange_id).upper()+'::'+symbol_id)
+                data = self.rc.xreadgroup(str(stream))
+                logger.info(data)
                 if data != None and data != []:
                     [[stream, [[number, d]]]] = data
                     self.rc.ack(str(stream), str(number))
+                self.rc.remove_group(str(stream))
             except Exception as e:
-                logger.warn(e)
+                raise e
 
 
     def load_markets(self, exchange_id):
@@ -45,14 +46,12 @@ class Actuator:
 
     def forever(self, keys):
         while True:
-            try:
-                now = datetime.now()
+            now = datetime.now()
+            logger.info(f"Started at second: {now.second}...")
+            if now.second == 00:
                 for exchange in keys.keys():
                     self.get_data(exchange)
-                later = datetime.now()
-                if (later - now).total_seconds() < 60:
-                    ter = 60 - (later - now).total_seconds()
-                    logger.info(f'Will sleep for {ter} seconds zZ')
-                    sleep(ter)
-            except Exception as e:
-                raise e
+            else:
+                ter = 60 - now.second
+                logger.info(f'Will sleep for {ter} seconds zZ')
+                time.sleep(ter)
